@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.projects.api_endpoints.task.change_priority.serializer import ChangePrioritySerializer
 
 
-class StatusChangerAPIView(GenericAPIView):
+class PriorityChangerAPIView(GenericAPIView):
 	permission_classes = [IsAuthenticated]
 	serializer_class = ChangePrioritySerializer
 
