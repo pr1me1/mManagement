@@ -6,6 +6,6 @@ app_name = "apps.socket_message"
 
 
 urlpatterns = [
-	path('task/<uuid:uuid>/messages', TaskMessageListRetrieve.as_view(), name='task_messages'),
-	path("project/<uuid:uuid>/messages", ProjectMessageListRetrieve.as_view())
+	# path('task/<uuid:uuid>/messages', TaskMessageListRetrieve.as_view(), name='task_messages'),
+	# path("project/<uuid:uuid>/messages", ProjectMessageListRetrieve.as_view())
 ]

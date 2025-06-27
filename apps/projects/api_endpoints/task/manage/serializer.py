@@ -6,22 +6,17 @@ from apps.users.api_endpoints.list.serializer import UserListSerializer
 
 class TaskModelSerializer(serializers.ModelSerializer):
 	developers = serializers.SerializerMethodField()
-	testers = serializers.SerializerMethodField()
 	owner = serializers.SerializerMethodField()
 	logs = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Tasks
-		fields = ("uuid", "name", "description", "status", "priority", "developers", "testers", "owner", "logs")
-		read_only_fields = ("uuid", "status", "developers", "testers", "owner")
+		fields = ("uuid", "name", "description", "status", "priority", "developers", "owner", "logs")
+		read_only_fields = ("uuid", "status", "developers", "owner")
 
 	def get_developers(self, obj):
 		developers = obj.devs_res.all()
 		return UserListSerializer(developers, many=True).data
-
-	def get_testers(self, obj):
-		testers = obj.testers_res.all()
-		return UserListSerializer(testers, many=True).data
 
 	def get_owner(self, obj):
 		return UserListSerializer(obj.created_by, many=False).data

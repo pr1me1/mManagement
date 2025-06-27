@@ -11,8 +11,6 @@ class WebsocketJWTAuthMiddleware(BaseMiddleware):
 
 	async def __call__(self, *args, **kwargs):
 
-		print("WebsocketJWTAuthMiddleware called with args:", args, "and kwargs:", kwargs)
-
 		user = await self.authenticate(scope=args[0])
 		if user is not None:
 			args[0]['user'] = user

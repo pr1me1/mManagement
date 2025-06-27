@@ -2,12 +2,10 @@ from rest_framework import serializers
 
 from apps.projects.models import Tasks, AuditLog
 from apps.users.models import User
-from apps.users.utils import send_notification_to_email
 
 
 class SetStaffSerializer(serializers.Serializer):
 	staff_ids = serializers.ListField(child=serializers.IntegerField(), required=True)
-	role = serializers.ChoiceField(choices=["developer", "tester"])
 	task_uuid = serializers.UUIDField(write_only=True)
 
 	def validate(self, attrs):
@@ -33,11 +31,18 @@ class SetStaffSerializer(serializers.Serializer):
 			raise serializers.ValidationError({"staff_ids": "One or more user IDs are invalid"})
 
 		existing_devs = set(task.devs_res.values_list('id', flat=True))
-		existing_testers = set(task.testers_res.values_list('id', flat=True))
 		new_staff_ids = set(staff_ids)
-		if new_staff_ids & (existing_devs | existing_testers):
+		if new_staff_ids & existing_devs:
 			raise serializers.ValidationError(
-				{"staff_ids": "One or more users are already assigned as developers or testers"})
+				{"staff_ids": "One or more users are already assigned as developers "})
+
+		project = task.project
+
+		project_devs = set(project.developer.value_list("id", flat=True))
+
+		if not (new_staff_ids & project_devs):
+			raise serializers.ValidationError(
+				{"staff_ids": "Some developers that you want to assign to this task is not in project"})
 
 		attrs['task'] = task
 		attrs['staffs'] = staffs
@@ -57,14 +62,13 @@ class SetStaffSerializer(serializers.Serializer):
 		task.status = Tasks.TaskStatus.Progress
 		task.save()
 
-		if task.priority == Tasks.TaskPriority.High:
-			email = []
-
-			for staff in staffs:
-				email.append(staff.email)
-
-			send_notification_to_email(task.project.name, email,
-									   f"From now you are responsible for the high-priority task named {task.name}")
+		from apps.socket_message.signals import assigned_dev_to_task
+		assigned_dev_to_task.send(
+			sender=self.__class__,
+			task=task,
+			project=task.project,
+			devs=staffs
+		)
 
 		AuditLog.objects.create(
 			created_by=self.validated_data['requester'],

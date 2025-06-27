@@ -31,6 +31,7 @@ class ChatWebsocketConsumer(AsyncJsonWebsocketConsumer):
 
 	async def send_message_from_django(self, event):
 		data = event["data"]
+
 		await self.send_json(content={"type": "message", "data": data})
 
 
@@ -43,7 +44,7 @@ class DirectWebSocketConsumer(AsyncJsonWebsocketConsumer):
 
 	async def connect(self):
 		self.direct_room = self.scope["url_route"]["kwargs"]["username"]
-		print(f"\033[32m{self.direct_room}\033[0m")
+
 		self.room_name = f"direct_{self.direct_room}"
 
 		await self.channel_layer.group_add(self.room_name, self.channel_name)
@@ -65,4 +66,5 @@ class DirectWebSocketConsumer(AsyncJsonWebsocketConsumer):
 
 	async def send_message_from_django(self, event):
 		data = event["data"]
+
 		await self.send_json(content={"type": "notification", "data": data})

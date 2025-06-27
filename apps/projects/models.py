@@ -40,7 +40,6 @@ class Tasks(BaseModel):
 	priority = models.CharField(choices=TaskPriority.choices, default=TaskPriority.Low)
 	project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="project_tasks")
 	devs_res = models.ManyToManyField(to=User, related_name="task_responsible")
-	testers_res = models.ManyToManyField(to=User, related_name="test_responsible")
 	created_by = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="tasks_created")
 
 

@@ -81,4 +81,12 @@ class TaskCreateSerializer(serializers.ModelSerializer):
 			project=validated_data['project'],
 			created_by=validated_data['created_by']
 		)
+
+		from apps.socket_message.signals import new_task_created
+		new_task_created.send(
+			sender=self.__class__,
+			task=task,
+			project=validated_data.get("project")
+		)
+
 		return task
